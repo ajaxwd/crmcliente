@@ -1,9 +1,31 @@
-import React from 'react';
+import React, {useState} from 'react';
+import { useRouter } from 'next/router';
 import Layout from '../components/layout';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useMutation, gql } from '@apollo/client';
+
+const NUEVA_CUENTA = gql`
+    mutation nuevoUsuario($input: UsuarioInput){
+        nuevoUsuario(input: $input){
+            id
+            nombre
+            apellido
+            email
+        }
+    }
+`;
 
 const NuevaCuenta = () => {
+
+    //El estado del mensaje
+    const [mensaje, guardarMensajes] = useState(null);
+
+    //Obtener productos de graphql
+    const [ nuevoUsuario ] = useMutation(NUEVA_CUENTA);
+
+    //Routing
+    const router = useRouter();
 
     // validación de formulario
     const formik = useFormik({
@@ -25,14 +47,53 @@ const NuevaCuenta = () => {
                         .required('El password no puede ir vacio')
                         .min(6, 'El password deber ser de al menos 6 caracteres')
         }),
-        onSubmit: valores => {
-            console.log('');
+        onSubmit: async valores => {
+
+            const { nombre, apellido, email, password } = valores;
+            try {
+                const { data } = await nuevoUsuario({
+                    variables: {
+                        input: {
+                            nombre,
+                            apellido,
+                            email,
+                            password
+                        }
+                    }
+                });
+
+                //Usuario creado correctamente
+                guardarMensajes(`Se creo correctamente el usuario: ${data.nuevoUsuario.nombre}`);
+
+                setTimeout(() => {
+                    guardarMensajes(null);
+                    router.push('/login');
+                }, 3000);
+
+                //Redirigir a usuario para iniciar sesión
+            } catch (error) {
+                guardarMensajes(error,message.replace('GraphQL error: ', ''));
+
+                setTimeout(() => {
+                    guardarMensajes(null);
+                }, 3000);
+            }
         } 
     });
+
+    //if (loading) return 'Cargando...'
+    const mostrarMensaje = () => {
+        return(
+            <div className = "bg-white py-2 px-3 w-full my-3 max-w-sm text-center mx-auto">
+                <p>{mensaje}</p>
+            </div>
+        )
+    }
 
     return (
         <>
         <Layout>
+            {mensaje && mostrarMensaje}
         <h1 className = "text-center text-2xl text-white font-light">Crear Nueva Cuenta</h1>
         <div className = "flex justify-center mt-5">
             <div className = "w-full max-w-sm">
