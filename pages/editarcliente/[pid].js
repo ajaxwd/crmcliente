@@ -1,117 +1,40 @@
-import React, {useState} from 'react';
-import Layout from '../components/layout';
-import { useFormik} from 'formik';
-import * as Yup from 'yup';
-import { gql, useMutation} from '@apollo/client';
-import { useRouter } from 'next/router';
+import React from 'react';
+import Layout from '../../components/layout';
+import { gql, useQuery} from '@apollo/client';
 
-const NUEVO_CLIENTE = gql`
-    mutation nuevoCliente($input: ClienteInput) {
-        nuevoCliente(input: $input) {
-            id
-            nombre
-            apellido
-            empresa
-            email
-            telefono
-        }
+const OBTENER_CLIENTE = gql`
+query obtenerCliente($id: ID!){
+    obtenerCliente(id: $id) {
+        nombre
+        apellido
+        email
+        telefono
+        empresa
     }
+}
 `;
 
-const OBTENER_CLIENTES_USUARIO = gql`
-  query obtenerClienteVendedor {
-    obtenerClienteVendedor {
-      id
-      nombre
-      apellido
-      empresa
-      email
-    }
-  }
-`;
 
-const NuevoCliente = () => {
+const EditarCliente = () => {
 
+    // obtener el ID actual
     const router = useRouter();
+    const { query: id } = router;
+    console.log(id);
 
-    //mensaje de alerta
-    const [mensaje, guardarMensaje] = useState(null);
-
-    // Mutation de nuevo cliente
-    const [ nuevoCliente ] = useMutation(NUEVO_CLIENTE, {
-        update(cache, { data: {nuevoCliente}}) {
-            //obtenerel objeto de cache que deseamos actualizar
-            const { obtenerClientesVendedor } = cache.readQuery({query: OBTENER_CLIENTES_USUARIO});
-            
-             // Reescribimos el cache (el cache nunca se debe modificar)
-            cache.writeQuery({
-                query: OBTENER_CLIENTES_USUARIO,
-                data: {
-                    obtenerClientesVendedor: [...obtenerClientesVendedor, nuevoCliente]
-                } 
-            })
+    // obtener cliente
+    const { data, loading, error} = useQuery(OBTENER_CLIENTE, {
+        variable: {
+            id
         }
     });
 
-    const formik = useFormik({
-        initialValues: {
-            nombre: '',
-            apellido:'',
-            empresa:'',
-            email:'',
-            telefono:''
-        },
-        validationSchema: yup.object({
-            nombre: Yup.string()
-                    .required('El nombre del cliente es obligatorio'),
-            apellido: Yup.string()
-                    .required('El apellido del cliente es obligatorio'),
-            empresa: Yup.string()
-                    .required('El campo empresa es obligatorio'),
-            email: Yup.string()
-                    .email('email no válido')
-                    .required('El email del cliente es obligatorio')
-        }),
-        onSubmit: async valores => {
-            
-            const { nombre, apellido, empresa, email, telefono } = valores;
-
-            try {
-                const { data } = await nuevoCliente({
-                    variables: {
-                        input: {
-                            nombre,
-                            apellido,
-                            empresa,
-                            email,
-                            telefono
-                        }
-                    }
-                });
-                router.push('/');    
-            } catch (error) {
-                guardarMensaje(error.message.replace('GraphQL error: ', ''));
-
-                setTimeout(() => {
-                    guardarMensaje(null);
-                }, 2000);
-            }
-        }
-
-    });
-
-    const mostrarMensaje = () => {
-        return(
-            <div className = "bg-white py-2 px-3 w-full my-3 max-w-sm text-center mx-auto">
-                <p>{mensaje}</p>
-            </div>
-        )
-    }
-
+    if(loading) return 'Cargando...';
+  
     return (
         <Layout>
-            <h1 className = "text-2xl text-gray-800 font-light">Nuevo Cliente</h1>
-            {mensaje && mostrarMensaje}
+            <h1 className = "text-2xl text-gray-800 font-light">Editar Cliente</h1>
+
             <div className = "flex justity-center mt-5">
                 <div className = "w-full max-w-lg">
                     <form className = "bg-white shadow-md px-8 pt-6 pb-8 mb-4"
@@ -235,8 +158,8 @@ const NuevoCliente = () => {
                     </form>
                 </div>
             </div>
-        </Layout>  
+        </Layout>
     );
 }
 
-export default NuevoCliente;
+export default EditarCliente;

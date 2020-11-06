@@ -1,6 +1,7 @@
 import React from 'react';
 import Swal from 'sweetalert2'
 import {gql, useMutation} from '@apollo/client';
+import Router from 'next/router';
 
 const ELIMINAR_CLIENTE = gql`
     mutation eliminarCliente($id: ID!){
@@ -32,7 +33,7 @@ const Cliente = ({cliente}) => {
             cache.writeQuery({
                 query: OBTENER_CLIENTES_USUARIO,
                 data: {
-                    obtenerclientesVendedor: obtenerclientesVendedor.filter( clienteActual => clienteActual.id °== id)
+                    obtenerclientesVendedor: obtenerclientesVendedor.filter( clienteActual => clienteActual.id !== id)
                 }
             })
         }
@@ -41,7 +42,7 @@ const Cliente = ({cliente}) => {
     const { nombre, apellido, empresa, email, id } = cliente;
 
     // Eliminar un cliente
-    const confirmarEliminarCliente = (id) => {
+    const confirmarEliminarCliente = () => {
         Swal.fire({
             title: '¿Desea eliminar a este cliente?',
             text:'Esta acción no se puede deshacer',
@@ -73,6 +74,13 @@ const Cliente = ({cliente}) => {
         })
     }
     
+    // Editar cliente
+    const editarCliente = () => {
+        Router.push({
+            pathname: "/editarcliente/{id}",
+            query: {id}
+        })
+    }
 
     return (
         <tr>
@@ -83,9 +91,18 @@ const Cliente = ({cliente}) => {
                 <button
                     type = "button"
                     className = "flex justify-center items-center bg-red-800 py-2 px-4 w-full text-white rounded text-xs uppercase font-bold"
-                    onClick = {() => confirmarEliminarCliente(id)}
+                    onClick = {() => confirmarEliminarCliente()}
                 >
                     Eliminar
+                </button>
+            </td>
+            <td className = "border px-4 py-2">
+                <button
+                    type = "button"
+                    className = "flex justify-center items-center bg-green-600 py-2 px-4 w-full text-white rounded text-xs uppercase font-bold"
+                    onClick = {() => editarCliente()}
+                >
+                    Editar
                 </button>
             </td>
         </tr>
