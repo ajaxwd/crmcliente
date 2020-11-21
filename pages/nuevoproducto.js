@@ -1,7 +1,30 @@
 import React from 'react';
 import Layout from '../components/layout';
+import {useFormik, yupToFormErrors} from 'formik';
+import * as Yup from 'yup';
 
 const NuevoProducto = () => {
+
+    //Formulario para nuestro productos
+    const formik = useFormik({
+        initialValues: {
+            nombre: '',
+            existencia: '',
+            precio: ''
+        },
+        validationSchema: Yup.object({
+            nombre: Yup.string()
+                    .required('El nobre del producto es obligatorio'),
+            existencia: Yup.number()
+                    .required('Agrega la cantidad disponible')
+                    .positive('No se aceptan numeros negativos')
+                    .integer('La existencia debe ser numero positivo'),
+            precio: Yup.number()
+                    .required('El precio es obligatorio')
+                    .positive('No se aceptan numeros negativos')
+        })
+    })
+
     return (
         <Layout>
             <h1 className = "text-2xl text-gray-800 font-light">Crear Nuevo Producto</h1>
@@ -20,12 +43,19 @@ const NuevoProducto = () => {
                         id = "nombre"
                         type = "text"
                         placeholder = "Nuevo Cliente"
-                        //value = {formik.values.nombre}
-                        //onChange = {formik.handleChange}
-                        //onBlur = {formik.handleBlur}
+                        value = {formik.values.nombre}
+                        onChange = {formik.handleChange}
+                        onBlur = {formik.handleBlur}
                         >                      
                         </input>
                     </div>
+                    { formik.touched.nombre && formik.errors.nombre ? (
+                        <div className = "my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+                            <p className = "font-bold">Error</p>
+                            <p>{formik.errors.nombre}</p>
+                        </div>
+                        ) : null
+                    }
                     <div className = "mb-4"> 
                         <label className = "block text-gray-700 text-sm font-bold mb-2" htmlFor="existencia">
                         Cantidad Disponible
@@ -35,12 +65,19 @@ const NuevoProducto = () => {
                         id = "existencia"
                         type = "number"
                         placeholder = "Cantidad Disponible"
-                        //value = {formik.values.nombre}
-                        //onChange = {formik.handleChange}
-                        //onBlur = {formik.handleBlur}
+                        value = {formik.values.existencia}
+                        onChange = {formik.handleChange}
+                        onBlur = {formik.handleBlur}
                         >                      
                         </input>
                     </div>
+                    { formik.touched.existencia && formik.errors.existencia ? (
+                        <div className = "my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+                            <p className = "font-bold">Error</p>
+                            <p>{formik.errors.existencia}</p>
+                        </div>
+                        ) : null
+                    }
                     <div className = "mb-4"> 
                         <label className = "block text-gray-700 text-sm font-bold mb-2" htmlFor="precio">
                         Precio
@@ -50,12 +87,19 @@ const NuevoProducto = () => {
                         id = "precio"
                         type = "number"
                         placeholder = "Precio Producto"
-                        //value = {formik.values.nombre}
-                        //onChange = {formik.handleChange}
-                        //onBlur = {formik.handleBlur}
+                        value = {formik.values.precio}
+                        onChange = {formik.handleChange}
+                        onBlur = {formik.handleBlur}
                         >                      
                         </input>
                     </div>
+                    { formik.touched.precio && formik.errors.precio ? (
+                        <div className = "my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+                            <p className = "font-bold">Error</p>
+                            <p>{formik.errors.precio}</p>
+                        </div>
+                        ) : null
+                    }
                     <input
                         type = "submit"
                         className = "bg-gray-800 w-full mt-5 p-2 text-white uppercase font-bold hover:bg-gray-900"
