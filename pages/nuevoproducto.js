@@ -17,13 +17,37 @@ const NUEVO_PRODUCTO = gql`
     }
 `;
 
+const OBTENER_PRODUCTOS = gql`
+    query obtenerProductos {
+        obtenerProducots {
+            id 
+            nombre
+            precio
+            existencia
+        }
+    }
+`;
+
 const NuevoProducto = () => {
 
     //Router
     const router = useRouter();
 
     //mutation nuevo producto
-    const [nuevoProducto] = useMutation(NUEVO_PRODUCTO);
+    const [nuevoProducto] = useMutation(NUEVO_PRODUCTO, {
+        update(cache, { data: {nuevoProducto}}){
+            //obtener objeto de cache
+            const { obtenerProductos} = cache.readQuery({query: OBTENER_PRODUCTOS});
+
+            // reescribir ese objeto
+            cache.writeQuery({
+                query: OBTENER_PRODUCTOS,
+                data: {
+                    obtenerProductos: [...obtenerProductos, nuevoProducto]
+                }
+            })
+        }
+    });
 
     //Formulario para nuestro productos
     const formik = useFormik({
