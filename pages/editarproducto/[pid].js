@@ -2,6 +2,9 @@ import React from 'react';
 import Layout from '../../components/layout';
 import {useRouter} from 'next/router';
 import {gql, useQuery} from '@apollo/client';
+import {Formik} from 'formik';
+import * as Yup from 'yup';
+import { valueToObjectRepresentation } from '@apollo/client/utilities';
 
 const OBTENER_PRODUCTO = gql`
     query obtenerProducto($id: ID!) {
@@ -24,7 +27,24 @@ const EditarProducto = () => {
         }
     });
 
+    //Shema de validacion
+    const schemaValidation = Yup.object({
+        nombre: Yup.string()
+                .required('El nobre del producto es obligatorio'),
+        existencia: Yup.number()
+                .required('Agrega la cantidad disponible')
+                .positive('No se aceptan numeros negativos')
+                .integer('La existencia debe ser numero positivo'),
+        precio: Yup.number()
+                .required('El precio es obligatorio')
+                .positive('No se aceptan numeros negativos')
+    });
+
     if(loading) return 'Cargando...';
+
+    const actualizarInfiProducto = valores => {
+        console.log(valores);
+    }
 
     const {obtenerProducto} = data;
 
@@ -34,8 +54,20 @@ const EditarProducto = () => {
 
             <div className = "flex justity-center mt-5">
                 <div className = "w-full max-w-lg">
+                    <Formik
+                    enableReinitialize
+                    initialValues={obtenerProducto}
+                    validationSchema={schemaValidation}
+                    onSubmit={valores => {
+                        actualizarInfiProducto(valores)
+                    }}
+                    >
+                        {props => {
+                            return (
+
+                       
                     <form className = "bg-white shadow-md px-8 pt-6 pb-8 mb-4"
-                    //onsubmit = {formik.handleSubmit}
+                    onsubmit = {props.handleSubmit}
                     >
                     <div className = "mb-4"> 
                         <label className = "block text-gray-700 text-sm font-bold mb-2" htmlFor="nombre">
@@ -46,16 +78,16 @@ const EditarProducto = () => {
                         id = "nombre"
                         type = "text"
                         placeholder = "Nuevo Cliente"
-                        value = {formik.values.nombre}
-                        onChange = {formik.handleChange}
-                        onBlur = {formik.handleBlur}
+                        value = {props.values.nombre}
+                        onChange = {props.handleChange}
+                        onBlur = {props.handleBlur}
                         >                      
                         </input>
                     </div>
-                    { formik.touched.nombre && formik.errors.nombre ? (
+                    { props.touched.nombre && props.errors.nombre ? (
                         <div className = "my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                             <p className = "font-bold">Error</p>
-                            <p>{formik.errors.nombre}</p>
+                            <p>{props.errors.nombre}</p>
                         </div>
                         ) : null
                     }
@@ -68,16 +100,16 @@ const EditarProducto = () => {
                         id = "existencia"
                         type = "number"
                         placeholder = "Cantidad Disponible"
-                        value = {formik.values.existencia}
-                        onChange = {formik.handleChange}
-                        onBlur = {formik.handleBlur}
+                        value = {props.values.existencia}
+                        onChange = {props.handleChange}
+                        onBlur = {props.handleBlur}
                         >                      
                         </input>
                     </div>
-                    { formik.touched.existencia && formik.errors.existencia ? (
+                    { props.touched.existencia && props.errors.existencia ? (
                         <div className = "my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                             <p className = "font-bold">Error</p>
-                            <p>{formik.errors.existencia}</p>
+                            <p>{props.errors.existencia}</p>
                         </div>
                         ) : null
                     }
@@ -90,16 +122,16 @@ const EditarProducto = () => {
                         id = "precio"
                         type = "number"
                         placeholder = "Precio Producto"
-                        value = {formik.values.precio}
-                        onChange = {formik.handleChange}
-                        onBlur = {formik.handleBlur}
+                        value = {props.values.precio}
+                        onChange = {props.handleChange}
+                        onBlur = {props.handleBlur}
                         >                      
                         </input>
                     </div>
-                    { formik.touched.precio && formik.errors.precio ? (
+                    { props.touched.precio && props.errors.precio ? (
                         <div className = "my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                             <p className = "font-bold">Error</p>
-                            <p>{formik.errors.precio}</p>
+                            <p>{props.errors.precio}</p>
                         </div>
                         ) : null
                     }
@@ -110,9 +142,11 @@ const EditarProducto = () => {
                     >
                     </input>
                     </form>
+                         )
+                        }}
+                    </Formik>
                 </div>
             </div>
-
         </Layout>
     );
 }
