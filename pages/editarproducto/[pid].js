@@ -1,10 +1,10 @@
 import React from 'react';
 import Layout from '../../components/layout';
 import {useRouter} from 'next/router';
-import {gql, useQuery} from '@apollo/client';
+import {gql, useQuery, useMutation} from '@apollo/client';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
-import { valueToObjectRepresentation } from '@apollo/client/utilities';
+import Swal from 'sweetalert2';
 
 const OBTENER_PRODUCTO = gql`
     query obtenerProducto($id: ID!) {
@@ -14,6 +14,17 @@ const OBTENER_PRODUCTO = gql`
             existencia
         }
     }
+`;
+
+const ACTUALIZAR_PRODUCTO = gql`
+mutation actualiacionProducto($id: ID!, $input: ProductoInput) {
+    actualizarProducto(id: $id, input: $input) {
+        id 
+        nombre
+        existencia
+        precio
+    }
+}
 `;
 
 const EditarProducto = () => {
@@ -26,6 +37,9 @@ const EditarProducto = () => {
             id
         }
     });
+
+    //Mutation actualizar producto
+    const [actualiacionProducto] = useMutation(ACTUALIZAR_PRODUCTO);
 
     //Shema de validacion
     const schemaValidation = Yup.object({
@@ -42,9 +56,38 @@ const EditarProducto = () => {
 
     if(loading) return 'Cargando...';
 
-    const actualizarInfiProducto = valores => {
-        console.log(valores);
+    if(!data){
+        return 'Acción no permitida';
     }
+
+    const actualizarInfiProducto = valores => {
+        const {nombre, existencia, precio} = valores;
+
+        try {
+            const {data} = await actualiacionProducto({
+                variables: {
+                    id,
+                    input:{
+                        nombre,
+                        existencia,
+                        precio
+                    }
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // redirigir hasta productos
+    router.push('/productos');
+
+    //Mostrar una alerta
+    Swal.fire(
+        'Correcto',
+        'El producto se actualizo correctamente',
+        'success'
+    )
 
     const {obtenerProducto} = data;
 
