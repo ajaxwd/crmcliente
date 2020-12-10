@@ -6,10 +6,9 @@ const Pedidos = () => {
     return (
         <Layout>
             <h1 className = "text-2xl text-gray-800 font-light">Pedidos</h1>
+            <Link href = "/nuevopedido">
+            </Link>
         </Layout>
-
-        <link href = "/nuevopedido">
-        </link>
     );
 }
 
