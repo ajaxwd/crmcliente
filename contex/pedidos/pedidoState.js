@@ -12,7 +12,7 @@ const PedidoState = (children) => {
 
     //State de Pedidos
     const initialState = {
-        cliente: [],
+        cliente: {},
         productos: [],
         total: 0
     }
