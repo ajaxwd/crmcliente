@@ -2,6 +2,7 @@ import React, {useState, useEffect, useContext} from 'react';
 import Select from 'react-select';
 import {gql, useQuery} from '@apollo/client';
 import Pedidocontext from '../../contex/pedidos/pedidoContex';
+
 const OBTENER_CLIENTES_USUARIO = gql`
   query obtenerClienteVendedor {
     obtenerClienteVendedor {
